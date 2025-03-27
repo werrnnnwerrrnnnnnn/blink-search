@@ -1,0 +1,5 @@
+.venv/
+venv/
+app/dataset
+app/search_algorithms/__pycache__
+.DS_Store

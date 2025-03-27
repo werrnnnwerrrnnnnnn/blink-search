@@ -1,0 +1,35 @@
+<form method="POST">
+    <input type="text" name="query" placeholder="Enter keyword" required>
+
+    <input type="hidden" name="algorithm" value="linear">
+
+    <label for="limit">Reviews to load:</label>
+    <select name="limit" id="limit">
+        <option value="100">100</option>
+        <option value="500" selected>500</option>
+        <option value="1000">1000</option>
+        <option value="2000">2000</option>
+        <option value="5000">5000</option>
+    </select>
+
+    <button type="submit">Search</button>
+</form>
+
+{% if result %}
+    <h3>Results for: <em>{{ query }}</em></h3>
+    <p>
+        <strong>Algorithm:</strong> Linear Search |
+        <strong>Reviews searched:</strong> {{ limit }} |
+        <strong>Matches found:</strong> {{ result.linear.matches | length }}
+    </p>
+
+    <div style="max-height: 700px; overflow-y: auto; border: 1px solid #ccc; padding: 15px;">
+        <ul style="list-style-type: disc; padding-left: 20px;">
+            <p><strong>Linear Search:</strong></p>
+            <p><em>Time:</em> {{ result.linear.time }} ms ({{ result.linear.time_sec }} s) | <em>Memory:</em> {{ result.linear.memory }} KB</p>
+            {% for item in result.linear.matches %}
+                <li style="margin-bottom: 10px;">{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
