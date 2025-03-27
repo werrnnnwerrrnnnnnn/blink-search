@@ -2,4 +2,5 @@
 venv/
 app/dataset
 app/search_algorithms/__pycache__
+app/__pycache__
 .DS_Store

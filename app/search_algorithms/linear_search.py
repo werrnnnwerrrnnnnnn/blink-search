@@ -1,6 +1,7 @@
 import json
 import time
 import tracemalloc
+from utils import is_match
 
 def linear_search_streaming(file_path, query, limit=None):
     results = []
@@ -13,9 +14,9 @@ def linear_search_streaming(file_path, query, limit=None):
                 break
             doc = json.loads(line)
             text = doc.get("reviewText", "").strip()
-            if query.lower() in text.lower():
+
+            if is_match(text, query):
                 results.append(text)
-                # print(f"Matched: {text}")
 
     end_time = time.time()
     current, peak = tracemalloc.get_traced_memory()

@@ -1,8 +1,6 @@
 <form method="POST">
     <input type="text" name="query" placeholder="Enter keyword" required>
 
-    <input type="hidden" name="algorithm" value="linear">
-
     <label for="limit">Reviews to load:</label>
     <select name="limit" id="limit">
         <option value="100">100</option>
@@ -16,20 +14,19 @@
 </form>
 
 {% if result %}
-    {% if algorithm == "linear" %}
-        <div class="search-section">
+    <div class="search-section">
+        {% for algo in ['linear', 'inverted', 'trie', 'btree'] %}
+            <h3>{{ algo|capitalize }} Search</h3>
             <p>
-                <strong>Algorithm:</strong> Linear Search |
                 <strong>Reviews searched:</strong> {{ limit }} |
-                <strong>Matches found:</strong> {{ result.linear.matches | length }}
+                <strong>Matches found:</strong> {{ result[algo].matches | length }}
             </p>
-
             <p>
-                <em>Time:</em> {{ result.linear.time }} ms ({{ result.linear.time_sec }} s) |
-                <em>Memory:</em> {{ result.linear.memory }} KB
+                <em>Time:</em> {{ result[algo].time }} ms ({{ result[algo].time_sec }} s) |
+                <em>Memory:</em> {{ result[algo].memory }} KB
             </p>
-
-            <a href="{{ url_for('results', query=query, limit=limit) }}">View all results →</a>
-        </div>
-    {% endif %}
+            <a href="{{ url_for('results', query=query, limit=limit, algorithm=algo) }}">View all results →</a>
+            <hr>
+        {% endfor %}
+    </div>
 {% endif %}

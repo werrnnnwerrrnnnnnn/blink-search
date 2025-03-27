@@ -1,0 +1,53 @@
+import json
+import time
+import tracemalloc
+from utils import is_match  
+
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+        self.sentences = []
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+        self.inserted_sentences = [] 
+
+    def insert(self, sentence):
+        self.inserted_sentences.append(sentence)
+        node = self.root
+        for char in sentence.lower():
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end = True
+        node.sentences.append(sentence)
+
+    def get_all_sentences(self):
+        return self.inserted_sentences  
+
+def trie_search(dataset_path, query, limit):
+    start_time = time.time()
+    tracemalloc.start()
+
+    trie = Trie()
+
+    with open(dataset_path, "r") as f:
+        for i, line in enumerate(f):
+            if i >= limit:
+                break
+            review = json.loads(line)
+            text = review.get("reviewText", "").strip()
+            trie.insert(text)
+
+    result = [text for text in trie.get_all_sentences() if is_match(text, query)]
+
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    return {
+        "matches": result,
+        "time": round((time.time() - start_time) * 1000),
+        "memory": round(peak / 1024, 2)
+    }
