@@ -12,6 +12,8 @@ def index():
     result = {}
     query = ""
     selected_algorithm = ""
+    limit = 500
+    
     if request.method == "POST":
         query = request.form["query"]
         selected_algorithm = request.form["algorithm"]
