@@ -42,6 +42,8 @@ def index():
             print(f"Memory: {result['linear']['memory']} KB")
             print("=====================================")
 
+            app.config["cached_matches"] = result["linear"]["matches"]
+
         elif selected_algorithm == "inverted":
             # For future implementation
             pass
@@ -55,6 +57,14 @@ def index():
             pass
 
     return render_template("index.html", result=result, query=query, algorithm=selected_algorithm, limit=limit)
+
+@app.route("/results")
+def results():
+    query = request.args.get("query", "")
+    limit = int(request.args.get("limit", 500))
+    matches = app.config.get("cached_matches", [])
+
+    return render_template("results.html", query=query, limit=limit, matches=matches)
 
 if __name__ == "__main__":
     app.run(debug=True)

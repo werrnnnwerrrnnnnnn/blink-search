@@ -17,5 +17,22 @@ Please download the datasets manually and place them in the `app/dataset/` folde
 | Books 5-core      | [Books - 5-core (27,164,983 reviews)](https://nijianmo.github.io/amazon/index.html)     | JSON   | 22.36 GB |
 
 ## 📍 Structure
-dataset/
-├── Books_5-core.json
+
+```plaintext
+BLYNK-SEARCH/
+|- .venv/
+|- app/
+    |- dataset/
+    |- search_algorithms/
+        |- btree_search.py
+        |- inverted_index_search.py
+        |- linear_search.py
+        |- trie_search.py
+    |- templates/
+        |- index.html
+        |- results.html
+    ├── main.py
+|- .gitignore
+|- README.md
+|- requirements.txt
+```

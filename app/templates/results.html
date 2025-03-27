@@ -1,0 +1,11 @@
+<h2>Search Results for "<em>{{ query }}</em>"</h2>
+<p><strong>Total Matches:</strong> {{ matches | length }}</p>
+<p><a href="{{ url_for('index') }}">← Back to search</a></p>
+
+<div style="max-height: 600px; overflow-y: auto; border: 1px solid #ccc; padding: 15px;">
+    <ul style="list-style-type: disc; padding-left: 20px;">
+        {% for item in matches %}
+            <li style="margin-bottom: 10px;">{{ item }}</li>
+        {% endfor %}
+    </ul>
+</div>
