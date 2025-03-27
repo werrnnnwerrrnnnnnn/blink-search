@@ -19,7 +19,7 @@ def index():
     
     if request.method == "POST":
         query = request.form["query"]
-        selected_algorithm = request.form["algorithm"]
+        # selected_algorithm = request.form["algorithm"]
         limit = int(request.form.get("limit", 500))  # Default to 500
         
         print("\n========== Form Submission ==========")
@@ -28,8 +28,7 @@ def index():
         print(f"Limit: {limit}")
         
         if not query.strip():
-            return render_template("index.html", result=None, query=query, algorithm=selected_algorithm)
-
+            return render_template("index.html", result=None, query=query, limit=limit)
         result = {}
 
         # Linear

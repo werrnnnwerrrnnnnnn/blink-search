@@ -23,6 +23,7 @@ BLYNK-SEARCH/
 |- .venv/
 |- app/
     |- dataset/
+        |- ...
     |- search_algorithms/
         |- btree_search.py
         |- inverted_index_search.py
@@ -31,7 +32,8 @@ BLYNK-SEARCH/
     |- templates/
         |- index.html
         |- results.html
-    ├── main.py
+    |- main.py
+    |- utils.py
 |- .gitignore
 |- README.md
 |- requirements.txt

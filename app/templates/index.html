@@ -1,3 +1,4 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <form method="POST">
     <input type="text" name="query" placeholder="Enter keyword" required>
 
@@ -29,4 +30,91 @@
             <hr>
         {% endfor %}
     </div>
+
+    <h3>📊 Performance Charts</h3>
+
+    <!-- Chart 1: Query Time -->
+    <h3>Chart 1: Query Time</h3>
+    <canvas id="timeChart" width="600" height="100"></canvas>
+
+    <!-- Chart 2: Memory Usage -->
+    <h3>Chart 2: Memory Usage</h3>
+    <canvas id="memoryChart" width="600" height="100"></canvas>
+
+    <!-- Chart 3: Speedup -->
+    <h3>Chart 3: Speedup</h3>
+    <canvas id="speedupChart" width="600" height="100"></canvas>
+
+    <script>
+        const labels = ['Linear', 'Inverted', 'Trie', 'BTree'];
+
+        const times = [
+            {{ result.linear.time }},
+            {{ result.inverted.time }},
+            {{ result.trie.time }},
+            {{ result.btree.time }}
+        ];
+
+        const memory = [
+            {{ result.linear.memory }},
+            {{ result.inverted.memory }},
+            {{ result.trie.memory }},
+            {{ result.btree.memory }}
+        ];
+
+        const speedup = [
+            1,
+            {{ "%.2f" % (result.linear.time / result.inverted.time) }},
+            {{ "%.2f" % (result.linear.time / result.trie.time) }},
+            {{ "%.2f" % (result.linear.time / result.btree.time) }}
+        ];
+
+        new Chart(document.getElementById('timeChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Query Time (ms)',
+                    data: times,
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        new Chart(document.getElementById('memoryChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Memory Usage (KB)',
+                    data: memory,
+                    backgroundColor: ['#ff6b6b', '#6bcff6', '#6bf68e', '#f6f16b']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        new Chart(document.getElementById('speedupChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Speedup (vs Linear)',
+                    data: speedup,
+                    backgroundColor: ['#888', '#1cc88a', '#36b9cc', '#f6c23e']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
 {% endif %}
