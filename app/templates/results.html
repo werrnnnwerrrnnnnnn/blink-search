@@ -1,11 +1,34 @@
-<h2>{{ algorithm|capitalize }} Search Results for "<em>{{ query }}</em>"</h2>
-<p><strong>Total Matches:</strong> {{ matches | length }}</p>
-<p><a href="{{ url_for('index') }}">← Back to search</a></p>
+<!-- templates/results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ algorithm|capitalize }} Search Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
 
-<div style="max-height: 600px; overflow-y: auto; border: 1px solid #ccc; padding: 15px;">
-    <ul style="list-style-type: disc; padding-left: 20px;">
-        {% for item in matches %}
-            <li style="margin-bottom: 10px;">{{ item }}</li>
-        {% endfor %}
-    </ul>
+<div class="container py-5">
+    <h1 class="mb-4">{{ algorithm|capitalize }} Search Results</h1>
+    <p class="lead">
+        Query: <strong>{{ query }}</strong> |
+        Limit: <strong>{{ limit }}</strong> |
+        Matches: <strong>{{ matches|length }}</strong>
+    </p>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm mb-4">⬅ Back to Home</a>
+
+    {% if matches %}
+        <div class="list-group">
+            {% for match in matches %}
+            <div class="list-group-item">
+                <pre class="mb-0">{{ match }}</pre>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning mt-3">No matches found.</div>
+    {% endif %}
 </div>
+
+</body>
+</html>
