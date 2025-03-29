@@ -42,6 +42,28 @@
             </div>
             <button type="submit" class="btn btn-dark">Run Benchmark</button>
             </form>
+
+            <form action="/complexity" method="GET" style="margin-top: 10px;">
+              <input type="hidden" name="query" id="hidden-query" value="{{ query or '' }}">
+              <button type="submit" id="complexity-btn" class="btn btn-outline-primary mt-2">Analyze Time Complexity</button>
+            </form>
+            
+            <script>
+                // Disable the button if query is empty
+                document.addEventListener("DOMContentLoaded", function() {
+                    const queryInput = document.getElementById("query");
+                    const hiddenQuery = document.getElementById("hidden-query");
+                    const button = document.getElementById("complexity-btn");
+            
+                    function updateHiddenQuery() {
+                        hiddenQuery.value = queryInput.value;
+                        button.disabled = queryInput.value.trim() === "";
+                    }
+            
+                    queryInput.addEventListener("input", updateHiddenQuery);
+                    updateHiddenQuery(); // initial call
+                });
+            </script>
         </div>
         </div>
 
