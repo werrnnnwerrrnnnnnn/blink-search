@@ -65,33 +65,40 @@
             <li>Enter <strong>comma-separated values</strong> for dataset sizes you want to test, e.g. <code>100, 500, 1000, 5000</code>.</li>
             <li>Click <strong>Run Complexity Analysis</strong> to generate a comparison chart for all algorithms.</li>
         </ul>
-    </div>
 
-    <!-- Loading Spinner -->
-    <div id="loading-spinner">
-        <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
-        <p>Analyzing time complexity, please wait...</p>
-    </div>
+        <!-- Form -->
+        <form method="POST" id="complexity-form">
+            <input type="hidden" name="query" value="{{ query }}">
+            <input type="hidden" name="query_type" value="{{ query_type }}">
+            <label for="limits">Enter comma-separated input sizes:</label>
+            <input type="text" id="limits" name="limits" placeholder="e.g., 100,500,1000" required>
+            <button type="submit">Run Complexity Analysis</button>
+        </form>
 
-    <!-- Form -->
-    <p><strong>Analyzing Query:</strong> {{ query }}</p>
-    <form method="POST" id="complexity-form">
-        <input type="hidden" name="query" value="{{ query }}">
-        <label for="limits">Enter comma-separated input sizes:</label>
-        <input type="text" id="limits" name="limits" placeholder="e.g., 100,500,1000" required>
-        <button type="submit">Run Complexity Analysis</button>
-    </form>
-    <hr>
+        <!-- Loading Spinner -->
+        <div id="loading-spinner">
+            <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+            <p>Analyzing time complexity, please wait...</p>
+        </div>
 
-    <h2>Time Complexity for Query: <span id="query-display"></span></h2>
-    <p><strong>Total time taken:</strong></p>
-    <ul>
-        <li>{{ total_time_ms }} ms</li>
-        <li>{{ total_time_sec }} seconds</li>
-        <li>{{ total_time_min }} min {{ total_time_sec_only }} sec</li>
-    </ul>
-    <div class="chart-container">
-        <canvas id="complexityChart"></canvas>
+        <hr>
+
+        <div style="color: green; font-weight: bold;">
+            ✔ Running time complexity for query "<em>{{ query }}</em>" ({{ query_type }})
+        </div>
+        <h2>Time Complexity for Query: <code>{{ query }}</code></h2>
+        <p><strong>Query Type:</strong> {{ query_type|capitalize }}</p>
+
+        <p><strong>Total time taken:</strong></p>
+        <ul>
+            <li>{{ total_time_ms }} ms</li>
+            <li>{{ total_time_sec }} seconds</li>
+            <li>{{ total_time_min }} min {{ total_time_sec_only }} sec</li>
+        </ul>
+
+        <div class="chart-container">
+            <canvas id="complexityChart"></canvas>
+        </div>
     </div>
 
     {% if limits %}

@@ -3,7 +3,8 @@ import time
 import tracemalloc
 from utils import is_match 
 
-def btree_search(dataset_path, query, limit):
+def btree_search(dataset_path, query, limit, query_type="exact"):
+    print(f"\n[{__name__}] Running {query_type} match for query: {query} (limit {limit})")
     start_time = time.time()
     tracemalloc.start()
 
@@ -19,7 +20,7 @@ def btree_search(dataset_path, query, limit):
 
     texts.sort()
 
-    result = [t for t in texts if is_match(t, query)]
+    result = [t for t in texts if is_match(t, query, query_type)]  # <- add query_type here too
 
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()

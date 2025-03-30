@@ -16,23 +16,26 @@ def index():
     query = ""
     selected_algorithm = ""
     limit = 500
+    query_type = "exact"
     
     if request.method == "POST":
         query = request.form["query"]
         # selected_algorithm = request.form["algorithm"]
         limit = int(request.form.get("limit", 500))  # Default to 500
+        query_type = request.form.get("query_type", "exact")
         
         print("\n========== Form Submission ==========")
         print("Running benchmark for all algorithms...")
         print(f"Query: {query}")
         print(f"Limit: {limit}")
-        
+        print(f"Query Type: {query_type}")
+
         if not query.strip():
             return render_template("index.html", result=None, query=query, limit=limit)
         result = {}
 
         # Linear
-        raw_result = linear_search_streaming(dataset_path, query, limit)
+        raw_result = linear_search_streaming(dataset_path, query, limit, query_type)
         result["linear"] = {
             "matches": raw_result["matches"],
             "time": raw_result["time"],
@@ -41,7 +44,7 @@ def index():
         }
 
         # Inverted Index
-        raw_result = inverted_index_search(dataset_path, query, limit)
+        raw_result = inverted_index_search(dataset_path, query, limit, query_type)
         result["inverted"] = {
             "matches": raw_result["matches"],
             "time": raw_result["time"],
@@ -50,7 +53,7 @@ def index():
         }
 
         # Trie
-        raw_result = trie_search(dataset_path, query, limit)
+        raw_result = trie_search(dataset_path, query, limit, query_type)
         result["trie"] = {
             "matches": raw_result["matches"],
             "time": raw_result["time"],
@@ -59,7 +62,7 @@ def index():
         }
 
         # B-Tree
-        raw_result = btree_search(dataset_path, query, limit)
+        raw_result = btree_search(dataset_path, query, limit, query_type)
         result["btree"] = {
             "matches": raw_result["matches"],
             "time": raw_result["time"],
@@ -69,7 +72,7 @@ def index():
 
         app.config["cached_matches"] = result  # Save all matches
 
-    return render_template("index.html", result=result, query=query, limit=limit)
+    return render_template("index.html", result=result, query=query, limit=limit, query_type=query_type)
 
 @app.route("/results")
 def results():
@@ -85,10 +88,12 @@ def results():
 def complexity():
     if request.method == "GET":
         query = request.args.get("query", "")
+        query_type = request.args.get("query_type", "exact")  # <-- Add this
         return render_template(
             "complexity.html", 
-            query=query, 
-            limits=[],  # Prevent tojson error
+            query=query,
+            query_type=query_type,  # <-- Add this
+            limits=[],
             chart_data={
                 "linear": [],
                 "inverted": [],
@@ -102,6 +107,7 @@ def complexity():
         )
 
     query = request.form.get("query", "")
+    query_type = request.form.get("query_type", "exact")
     limits_raw = request.form.get("limits", "")
     
     if not query.strip():
@@ -113,6 +119,11 @@ def complexity():
         limits = [int(x.strip()) for x in limits_raw.split(",") if x.strip().isdigit()]
     except Exception:
         return "Invalid input sizes. Please enter comma-separated numbers.", 400
+    
+    print("\n========== Running Time Complexity ==========")
+    print(f"=== Query: {query}")
+    print(f"=== Query Type: {query_type}")
+    print(f"=== Limits: {limits}")
 
     algorithms = {
         "linear": linear_search_streaming,
@@ -127,7 +138,7 @@ def complexity():
     for limit in limits:
         for algo_name, func in algorithms.items():
             try:
-                result = func(dataset_path, query, limit)
+                result = func(dataset_path, query, limit, query_type=query_type)
                 time_taken = result.get("time", 0)
                 chart_data[algo_name].append(time_taken)
                 print(f"{algo_name} | Limit: {limit} | Time: {time_taken} ms")
@@ -142,6 +153,7 @@ def complexity():
 
     return render_template("complexity.html", 
                            query=query, 
+                           query_type=query_type,
                            limits=limits, 
                            chart_data=chart_data,
                            total_time_ms=total_time_ms,

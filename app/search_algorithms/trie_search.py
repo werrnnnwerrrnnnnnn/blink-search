@@ -27,7 +27,8 @@ class Trie:
     def get_all_sentences(self):
         return self.inserted_sentences  
 
-def trie_search(dataset_path, query, limit):
+def trie_search(dataset_path, query, limit, query_type="exact"):
+    print(f"\n[{__name__}] Running {query_type} match for query: {query} (limit {limit})")
     start_time = time.time()
     tracemalloc.start()
 
@@ -41,7 +42,7 @@ def trie_search(dataset_path, query, limit):
             text = review.get("reviewText", "").strip()
             trie.insert(text)
 
-    result = [text for text in trie.get_all_sentences() if is_match(text, query)]
+    result = [text for text in trie.get_all_sentences() if is_match(text, query, query_type)]
 
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()

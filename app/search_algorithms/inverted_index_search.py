@@ -3,7 +3,8 @@ import time
 import tracemalloc
 from utils import is_match, normalize
 
-def inverted_index_search(dataset_path, query, limit):
+def inverted_index_search(dataset_path, query, limit, query_type="exact"):
+    print(f"\n[{__name__}] Running {query_type} match for query: {query} (limit {limit})")
     start_time = time.time()
     tracemalloc.start()
 
@@ -17,7 +18,7 @@ def inverted_index_search(dataset_path, query, limit):
             text = review.get("reviewText", "").strip()
             indexed_texts.append(text)
 
-    matches = [text for text in indexed_texts if is_match(text, query)]
+    matches = [text for text in indexed_texts if is_match(text, query, query_type)]
 
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
