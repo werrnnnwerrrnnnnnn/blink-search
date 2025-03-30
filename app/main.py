@@ -156,10 +156,47 @@ def complexity():
                            query_type=query_type,
                            limits=limits, 
                            chart_data=chart_data,
+                           limits_input=limits_raw,
                            total_time_ms=total_time_ms,
                            total_time_sec=total_time_sec,
                            total_time_min=total_time_min,
                            total_time_sec_only=total_time_sec_only)
+
+
+@app.route("/simulate")
+def simulate():
+    queries = ["funny poems", "loved this book", "boring", "interesting premise"]
+    limits = [100, 500, 1000, 2000]
+
+    algorithms = {
+        "linear": linear_search_streaming,
+        "inverted": inverted_index_search,
+        "trie": trie_search,
+        "btree": btree_search
+    }
+
+    simulation_results = []
+
+    for query in queries:
+        entry = {"query": query, "data": {}}
+        for limit in limits:
+            entry["data"][limit] = {}
+            for algo_name, func in algorithms.items():
+                try:
+                    result = func(dataset_path, query, limit)
+                    entry["data"][limit][algo_name] = {
+                        "time": result["time"],
+                        "memory": result["memory"]
+                    }
+                except Exception as e:
+                    entry["data"][limit][algo_name] = {
+                        "time": None,
+                        "memory": None
+                    }
+                    print(f"[ERROR] {algo_name} failed on query '{query}' and limit {limit}: {e}")
+        simulation_results.append(entry)
+
+    return render_template("simulate.html", results=simulation_results)
 
 if __name__ == "__main__":
     app.run(debug=True)
