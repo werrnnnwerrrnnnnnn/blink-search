@@ -1,191 +1,236 @@
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
     <title>Time Complexity Analysis</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .chart-container {
-            width: 800px;
-            height: 300px;
-            margin: 20px auto;
-        }
+      .chart-container {
+        height: 400px;
+      }
 
-        /* Spinner CSS */
-        #loading-spinner {
-            display: none;
-            text-align: center;
-            margin: 30px auto;
-        }
+      #loading-spinner {
+        display: none;
+        text-align: center;
+        margin: 30px auto;
+      }
 
-        .lds-ring {
-            display: inline-block;
-            position: relative;
-            width: 64px;
-            height: 64px;
-        }
+      .lds-ring {
+        display: inline-block;
+        position: relative;
+        width: 64px;
+        height: 64px;
+      }
 
-        .lds-ring div {
-            box-sizing: border-box;
-            display: block;
-            position: absolute;
-            width: 51px;
-            height: 51px;
-            margin: 6px;
-            border: 6px solid #3498db;
-            border-radius: 50%;
-            animation: lds-ring 1.2s linear infinite;
-            border-color: #3498db transparent transparent transparent;
-        }
+      .lds-ring div {
+        box-sizing: border-box;
+        display: block;
+        position: absolute;
+        width: 51px;
+        height: 51px;
+        margin: 6px;
+        border: 6px solid #3498db;
+        border-radius: 50%;
+        animation: lds-ring 1.2s linear infinite;
+        border-color: #3498db transparent transparent transparent;
+      }
 
-        .lds-ring div:nth-child(1) {
-            animation-delay: -0.45s;
-        }
+      .lds-ring div:nth-child(1) {
+        animation-delay: -0.45s;
+      }
 
-        .lds-ring div:nth-child(2) {
-            animation-delay: -0.3s;
-        }
+      .lds-ring div:nth-child(2) {
+        animation-delay: -0.3s;
+      }
 
-        .lds-ring div:nth-child(3) {
-            animation-delay: -0.15s;
-        }
+      .lds-ring div:nth-child(3) {
+        animation-delay: -0.15s;
+      }
 
-        @keyframes lds-ring {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+      @keyframes lds-ring {
+        0% {
+          transform: rotate(0deg);
         }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
     </style>
-</head>
-<body>
-    <div style="max-width: 800px; margin: 20px auto; font-family: Arial, sans-serif;">
-        <h2>📈 Time Complexity Analysis</h2>
-        <p><strong>Instructions:</strong></p>
+  </head>
+
+  <body class="bg-light">
+    <div class="container py-5">
+      <h2 class="mb-4 text-center">📈 Time Complexity Analysis</h2>
+
+      <div class="card p-4 shadow-sm mb-4">
+        <h5 class="mb-3">Instructions:</h5>
         <ul>
-            <li>Enter your search query on the <a href="/">home page</a> and click <strong>Analyze Time Complexity</strong>.</li>
-            <li>You will be redirected here to configure dataset sizes.</li>
-            <li>Enter <strong>comma-separated values</strong> for dataset sizes you want to test, e.g. <code>100, 500, 1000, 5000</code>.</li>
-            <li>Click <strong>Run Complexity Analysis</strong> to generate a comparison chart for all algorithms.</li>
+          <li>Go to the <a href="/">home page</a> and run a benchmark.</li>
+          <li>
+            Enter <strong>comma-separated dataset sizes</strong> below (e.g.
+            <code>100,500,1000</code>).
+          </li>
+          <li>
+            Click <strong>Run Complexity Analysis</strong> to compare
+            algorithms.
+          </li>
         </ul>
-    </div>
+      </div>
 
-    <!-- Loading Spinner -->
-    <div id="loading-spinner">
-        <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+      <!-- Loading Spinner -->
+      <div id="loading-spinner">
+        <div class="lds-ring">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
         <p>Analyzing time complexity, please wait...</p>
-    </div>
+      </div>
 
-    <!-- Form -->
-    <p><strong>Analyzing Query:</strong> {{ query }}</p>
-    <form method="POST" id="complexity-form">
-        <input type="hidden" name="query" value="{{ query }}">
-        <label for="limits">Enter comma-separated input sizes:</label>
-        <input type="text" id="limits" name="limits" placeholder="e.g., 100,500,1000" required>
-        <button type="submit">Run Complexity Analysis</button>
-    </form>
-    <hr>
+      <!-- Query + Form -->
+      <div class="card p-4 shadow-sm mb-4">
+        <h5><strong>Analyzing Query:</strong> {{ query }}</h5>
+        <form method="POST" id="complexity-form" class="mt-3 row g-3">
+          <input type="hidden" name="query" value="{{ query }}" />
+          <div class="col-12 col-md-8">
+            <label for="limits" class="form-label">Input Sizes:</label>
+            <input
+              type="text"
+              id="limits"
+              name="limits"
+              class="form-control"
+              placeholder="e.g. 100,500,1000"
+              required,
+              value="{{ limits_input or '' }}"
+            />
+          </div>
+          <div class="col-12 col-md-4 align-self-end">
+            <button type="submit" class="btn btn-primary w-100">
+              Run Complexity Analysis
+            </button>
+          </div>
+        </form>
+      </div>
 
-    <h2>Time Complexity for Query: <span id="query-display"></span></h2>
-    <p><strong>Total time taken:</strong></p>
-    <ul>
-        <li>{{ total_time_ms }} ms</li>
-        <li>{{ total_time_sec }} seconds</li>
-        <li>{{ total_time_min }} min {{ total_time_sec_only }} sec</li>
-    </ul>
-    <div class="chart-container">
-        <canvas id="complexityChart"></canvas>
-    </div>
+      <!-- Results -->
+      {% if limits %}
+      <div class="card p-4 shadow-sm mb-4">
+        <h4 class="mb-3">
+          Time Complexity for Query: <code>{{ query }}</code>
+        </h4>
+        <ul>
+          <li><strong>Total Time:</strong> {{ total_time_ms }} ms</li>
+          <li><strong>In Seconds:</strong> {{ total_time_sec }} seconds</li>
+          <li>
+            <strong>Formatted:</strong> {{ total_time_min }} min {{
+            total_time_sec_only }} sec
+          </li>
+        </ul>
+        <div class="chart-container">
+          <canvas id="complexityChart"></canvas>
+        </div>
+      </div>
 
-    {% if limits %}
-    <script>
-        const query = {{ query | tojson | safe }};
-        const limits = {{ limits | tojson | safe }};
+      <script>
+        const labels = {{ limits | tojson | safe }};
         const chartData = {
-            linear: {{ chart_data.linear | tojson | safe }},
-            inverted: {{ chart_data.inverted | tojson | safe }},
-            trie: {{ chart_data.trie | tojson | safe }},
-            btree: {{ chart_data.btree | tojson | safe }}
+          linear: {{ chart_data.linear | tojson | safe }},
+          inverted: {{ chart_data.inverted | tojson | safe }},
+          trie: {{ chart_data.trie | tojson | safe }},
+          btree: {{ chart_data.btree | tojson | safe }}
         };
 
-        const ctx = document.getElementById('complexityChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: limits,
-                datasets: [
-                    {
-                        label: 'Linear',
-                        data: chartData.linear,
-                        borderColor: '#4e73df',
-                        backgroundColor: '#4e73df',
-                        tension: 0.2
-                    },
-                    {
-                        label: 'Inverted',
-                        data: chartData.inverted,
-                        borderColor: '#1cc88a',
-                        backgroundColor: '#1cc88a',
-                        tension: 0.2
-                    },
-                    {
-                        label: 'Trie',
-                        data: chartData.trie,
-                        borderColor: '#36b9cc',
-                        backgroundColor: '#36b9cc',
-                        tension: 0.2
-                    },
-                    {
-                        label: 'BTree',
-                        data: chartData.btree,
-                        borderColor: '#f6c23e',
-                        backgroundColor: '#f6c23e',
-                        tension: 0.2
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Time vs Dataset Size'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    legend: {
-                        position: 'top'
-                    }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Time (ms)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Dataset Size (limit)'
-                        }
-                    }
+        new Chart(document.getElementById('complexityChart'), {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Linear',
+                data: chartData.linear,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                tension: 0.3
+              },
+              {
+                label: 'Inverted',
+                data: chartData.inverted,
+                borderColor: '#1cc88a',
+                backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                tension: 0.3
+              },
+              {
+                label: 'Trie',
+                data: chartData.trie,
+                borderColor: '#36b9cc',
+                backgroundColor: 'rgba(54, 185, 204, 0.1)',
+                tension: 0.3
+              },
+              {
+                label: 'BTree',
+                data: chartData.btree,
+                borderColor: '#f6c23e',
+                backgroundColor: 'rgba(246, 194, 62, 0.1)',
+                tension: 0.3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Execution Time vs Dataset Size',
+                font: {
+                  size: 18
                 }
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false
+              },
+              legend: {
+                position: 'top'
+              }
+            },
+            interaction: {
+              mode: 'nearest',
+              axis: 'x',
+              intersect: false
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Time (ms)'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Dataset Size'
+                }
+              }
             }
+          }
         });
-    </script>
-    {% endif %}
+      </script>
+      {% endif %}
 
-    <!-- Spinner JavaScript -->
-    <script>
-        document.getElementById("complexity-form").addEventListener("submit", function() {
+      <!-- Show Spinner on Submit -->
+      <script>
+        document
+          .getElementById("complexity-form")
+          .addEventListener("submit", function () {
             document.getElementById("loading-spinner").style.display = "block";
-        });
-    </script>
-</body>
+          });
+      </script>
+    </div>
+  </body>
 </html>

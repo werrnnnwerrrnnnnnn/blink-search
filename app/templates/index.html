@@ -16,10 +16,10 @@
 
       <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <form method="POST" class="card p-4 shadow-sm mb-5">
+          <form method="POST" class="card p-4 shadow-sm mb-5">
             <div class="mb-3">
-                <label for="query" class="form-label">Enter search query:</label>
-                <input
+              <label for="query" class="form-label">Enter search query:</label>
+              <input
                 type="text"
                 class="form-control"
                 id="query"
@@ -27,48 +27,65 @@
                 value="{{ query }}"
                 placeholder="e.g. Harry Potter"
                 required
-                />
+              />
             </div>
             <div class="mb-3">
-                <label for="limit" class="form-label">Result Limit:</label>
-                <input
+              <label for="limit" class="form-label">Result Limit:</label>
+              <input
                 type="number"
                 class="form-control"
                 id="limit"
                 name="limit"
                 value="{{ limit }}"
                 min="1"
-                />
+              />
             </div>
             <button type="submit" class="btn btn-dark">Run Benchmark</button>
-            </form>
+            <div class="text-center mt-3">
+              <a href="/simulate" class="btn btn-outline-secondary">
+                🧪 Run Full Simulation
+              </a>
+            </div>
+          </form>
+          <script>
+            // Disable the button if query is empty
+            document.addEventListener("DOMContentLoaded", function () {
+              const queryInput = document.getElementById("query");
+              const hiddenQuery = document.getElementById("hidden-query");
+              const button = document.getElementById("complexity-btn");
 
-            <form action="/complexity" method="GET" style="margin-top: 10px;">
-              <input type="hidden" name="query" id="hidden-query" value="{{ query or '' }}">
-              <button type="submit" id="complexity-btn" class="btn btn-outline-primary mt-2">Analyze Time Complexity</button>
-            </form>
-            
-            <script>
-                // Disable the button if query is empty
-                document.addEventListener("DOMContentLoaded", function() {
-                    const queryInput = document.getElementById("query");
-                    const hiddenQuery = document.getElementById("hidden-query");
-                    const button = document.getElementById("complexity-btn");
-            
-                    function updateHiddenQuery() {
-                        hiddenQuery.value = queryInput.value;
-                        button.disabled = queryInput.value.trim() === "";
-                    }
-            
-                    queryInput.addEventListener("input", updateHiddenQuery);
-                    updateHiddenQuery(); // initial call
-                });
-            </script>
-        </div>
-        </div>
+              function updateHiddenQuery() {
+                hiddenQuery.value = queryInput.value;
+                button.disabled = queryInput.value.trim() === "";
+              }
 
+              queryInput.addEventListener("input", updateHiddenQuery);
+              updateHiddenQuery(); // initial call
+            });
+          </script>
+        </div>
+      </div>
 
       {% if result %}
+      <!-- Time Complexity Button -->
+      <div class="text-center mt-4 mb-5">
+        <form action="/complexity" method="GET" class="d-inline-block">
+          <input
+            type="hidden"
+            name="query"
+            id="hidden-query"
+            value="{{ query or '' }}"
+          />
+          <button
+            type="submit"
+            id="complexity-btn"
+            class="btn btn-outline-primary btn-lg px-4"
+          >
+            Analyze Time Complexity
+          </button>
+        </form>
+      </div>
+
       <h3 class="mb-3">📊 Benchmark Results</h3>
       <div class="row">
         {% for algo, data in result.items() %}
