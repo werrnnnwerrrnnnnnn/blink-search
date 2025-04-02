@@ -160,6 +160,12 @@
             id="hidden-query"
             value="{{ query or '' }}"
           />
+          <input
+            type="hidden"
+            name="query_type"
+            id="hidden-query-type"
+            value="{{ query_type or 'exact' }}"
+          />
           <button
             type="submit"
             id="complexity-btn"
@@ -305,8 +311,26 @@
 
       return false;
     }
-
-
+      
+        // 🔍 Update hidden fields and log selected query_type
+        document.addEventListener("DOMContentLoaded", function () {
+          const queryInput = document.getElementById("query");
+          const queryTypeSelect = document.getElementById("query_type");
+          const hiddenQuery = document.getElementById("hidden-query");
+          const hiddenQueryType = document.getElementById("hidden-query-type");
+          const button = document.getElementById("complexity-btn");
+      
+          function updateHiddenFields() {
+            hiddenQuery.value = queryInput.value;
+            hiddenQueryType.value = queryTypeSelect.value;
+            console.log("Selected query type:", hiddenQueryType.value); // 🔍 Console log
+            button.disabled = queryInput.value.trim() === "";
+          }
+      
+          queryInput.addEventListener("input", updateHiddenFields);
+          queryTypeSelect.addEventListener("change", updateHiddenFields);
+          updateHiddenFields(); // initial call
+        });
     </script>
   </body>
 </html>

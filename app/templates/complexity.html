@@ -91,6 +91,7 @@
       <!-- Query Info & Form -->
       <div class="card p-4 shadow-sm mb-4">
         <h5><strong>Analyzing Query:</strong> {{ query }}</h5>
+        <h10><strong>Query Type:</strong> {{ query_type }}</h10>
         <form method="POST" id="complexity-form" class="mt-3 row g-3">
           <input type="hidden" name="query" value="{{ query }}" />
           <input type="hidden" name="query_type" value="{{ query_type }}" />
