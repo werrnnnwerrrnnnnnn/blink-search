@@ -1,7 +1,7 @@
 import json
 import time
 import tracemalloc
-from utils import is_match  
+from utils import is_match
 
 class TrieNode:
     def __init__(self):
@@ -12,7 +12,7 @@ class TrieNode:
 class Trie:
     def __init__(self):
         self.root = TrieNode()
-        self.inserted_sentences = [] 
+        self.inserted_sentences = []
 
     def insert(self, sentence):
         self.inserted_sentences.append(sentence)
@@ -21,11 +21,19 @@ class Trie:
             if char not in node.children:
                 node.children[char] = TrieNode()
             node = node.children[char]
+            node.sentences.append(sentence)  # store at each prefix node
         node.is_end = True
-        node.sentences.append(sentence)
+
+    def search_prefix(self, prefix):
+        node = self.root
+        for char in prefix.lower():
+            if char not in node.children:
+                return []
+            node = node.children[char]
+        return node.sentences
 
     def get_all_sentences(self):
-        return self.inserted_sentences  
+        return self.inserted_sentences
 
 def trie_search(dataset_path, query, limit, query_type="exact"):
     print(f"\n[{__name__}] Running {query_type} match for query: {query} (limit {limit})")
@@ -42,7 +50,10 @@ def trie_search(dataset_path, query, limit, query_type="exact"):
             text = review.get("reviewText", "").strip()
             trie.insert(text)
 
-    result = [text for text in trie.get_all_sentences() if is_match(text, query, query_type)]
+    if query_type == "starts_with":
+        result = trie.search_prefix(query)
+    else:
+        result = [text for text in trie.get_all_sentences() if is_match(text, query, query_type)]
 
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
