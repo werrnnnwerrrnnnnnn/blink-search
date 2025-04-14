@@ -20,21 +20,24 @@ Please download the datasets manually and place them in the `app/dataset/` folde
 
 ```plaintext
 BLYNK-SEARCH/
-|- .venv/
+|- .gitignore
+|- README.md
+|- requirements.txt
+|- main.py
+|- utils.py
 |- app/
     |- dataset/
-        |- ...
+        |- Books_5-core.json
     |- search_algorithms/
         |- btree_search.py
         |- inverted_index_search.py
         |- linear_search.py
         |- trie_search.py
+    |- static/
+        |- favicon.webp
     |- templates/
+        |- complexity.html
         |- index.html
         |- results.html
-    |- main.py
-    |- utils.py
-|- .gitignore
-|- README.md
-|- requirements.txt
+        |- simulate.html
 ```
