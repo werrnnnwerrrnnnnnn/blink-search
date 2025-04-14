@@ -39,47 +39,79 @@
         <a href="/" class="btn btn-outline-secondary"> ⬅ Back to Home </a>
       </div>
 
-      {% for entry in results %}
-      <div class="card mb-4 shadow-sm">
-        <div class="card-header text-center">
-          <span class="query-title">Query: <code>{{ entry.query }}</code></span>
-        </div>
-        <div class="card-body">
-          <div class="row align-items-center justify-content-center">
-            <div class="col-md-6 chart-box">
-              <h6 class="text-center text-muted">⏱ Execution Time (ms)</h6>
-              <canvas id="timeChart_{{ loop.index }}"></canvas>
-            </div>
-            <div class="col-md-6 chart-box">
-              <h6 class="text-center text-muted">🧠 Memory Usage (KB)</h6>
-              <canvas id="memoryChart_{{ loop.index }}"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
+    <!-- ✅ Progress UI -->
+    <div id="progress-container" class="text-center mb-4">
+      <p id="progress-status">⏳ Initializing simulation...</p>
+      <div class="spinner-border text-primary" role="status"></div>
     </div>
 
-    <script>
-      const simulationResults = {{ results | tojson | safe }};
+    <!-- ✅ Hidden charts that show after simulation -->
+    <div id="chart-container" style="display: none;">
+      <div id="chart-render-target">
+        <!-- Charts will be injected dynamically -->
+      </div>
+    </div>
+  </div>
 
+  <script>
+    async function fetchProgress() {
+      const res = await fetch("/simulate/progress");
+      const data = await res.json();
+
+      const statusText = document.getElementById("progress-status");
+      if (data.status === "completed") {
+        statusText.textContent = "✅ Simulation completed!";
+        document.getElementById("progress-container").style.display = "none";
+        document.getElementById("chart-container").style.display = "block";
+        renderCharts(data.results);
+        clearInterval(pollingInterval);
+      } else {
+        statusText.textContent = `Running ${data.current_algo} on "${data.current_query}" (limit = ${data.current_limit})...`;
+      }
+    }
+
+    function renderCharts(simulationResults) {
+      const container = document.getElementById("chart-render-target");
       simulationResults.forEach((entry, i) => {
+        const chartIdTime = `timeChart_${i}`;
+        const chartIdMemory = `memoryChart_${i}`;
+        const card = document.createElement("div");
+        card.className = "card mb-4 shadow-sm";
+        card.innerHTML = `
+          <div class="card-header text-center">
+            <span class="query-title">Query: <code>${entry.query}</code></span>
+          </div>
+          <div class="card-body">
+            <div class="row align-items-center justify-content-center">
+              <div class="col-md-6 chart-box">
+                <h6 class="text-center text-muted">⏱ Execution Time (ms)</h6>
+                <canvas id="${chartIdTime}"></canvas>
+              </div>
+              <div class="col-md-6 chart-box">
+                <h6 class="text-center text-muted">🧠 Memory Usage (KB)</h6>
+                <canvas id="${chartIdMemory}"></canvas>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+
         const datasetSizes = Object.keys(entry.data);
         const algorithms = ["linear", "inverted", "trie", "btree"];
 
         const timeDatasets = algorithms.map(algo => ({
           label: algo.charAt(0).toUpperCase() + algo.slice(1),
-          data: datasetSizes.map(size => entry.data[size][algo].time),
+          data: datasetSizes.map(size => entry.data[size][algo]?.time),
           tension: 0.3
         }));
 
         const memoryDatasets = algorithms.map(algo => ({
           label: algo.charAt(0).toUpperCase() + algo.slice(1),
-          data: datasetSizes.map(size => entry.data[size][algo].memory),
+          data: datasetSizes.map(size => entry.data[size][algo]?.memory),
           tension: 0.3
         }));
 
-        new Chart(document.getElementById('timeChart_' + (i + 1)), {
+        new Chart(document.getElementById(chartIdTime), {
           type: 'line',
           data: {
             labels: datasetSizes,
@@ -108,7 +140,7 @@
           }
         });
 
-        new Chart(document.getElementById('memoryChart_' + (i + 1)), {
+        new Chart(document.getElementById(chartIdMemory), {
           type: 'line',
           data: {
             labels: datasetSizes,
@@ -137,6 +169,10 @@
           }
         });
       });
+    }
+
+    const pollingInterval = setInterval(fetchProgress, 1500);
+    fetch("/simulate/start");
     </script>
   </body>
 </html>

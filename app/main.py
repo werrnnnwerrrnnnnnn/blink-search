@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 from search_algorithms.linear_search import linear_search_streaming
 from search_algorithms.inverted_index_search import inverted_index_search
 from search_algorithms.trie_search import trie_search
@@ -6,9 +6,19 @@ from search_algorithms.btree_search import btree_search
 import json
 import time
 import tracemalloc
+import threading
 
 app = Flask(__name__)
 dataset_path = "dataset/Books_5-core.json"
+
+# Global progress state
+progress_state = {
+    "status": "not_started",
+    "current_query": "",
+    "current_limit": 0,
+    "current_algo": "",
+    "results": []
+}
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -165,38 +175,52 @@ def complexity():
 
 @app.route("/simulate")
 def simulate():
-    queries = ["funny poems", "loved this book", "boring", "interesting premise"]
-    limits = [100, 500, 1000, 2000]
+    return render_template("simulate.html")
 
-    algorithms = {
-        "linear": linear_search_streaming,
-        "inverted": inverted_index_search,
-        "trie": trie_search,
-        "btree": btree_search
-    }
+@app.route("/simulate/start")
+def start_simulation():
+    def run_simulation():
+        progress_state["status"] = "running"
+        queries = ["funny poems", "loved this book", "boring", "interesting premise"]
+        limits = [100, 500, 1000, 2000]
+        algorithms = {
+            "linear": linear_search_streaming,
+            "inverted": inverted_index_search,
+            "trie": trie_search,
+            "btree": btree_search
+        }
+        progress_state["results"] = []
 
-    simulation_results = []
+        for query in queries:
+            entry = {"query": query, "data": {}}
+            for limit in limits:
+                progress_state["current_query"] = query
+                progress_state["current_limit"] = limit
+                entry["data"][limit] = {}
+                for algo_name, func in algorithms.items():
+                    progress_state["current_algo"] = algo_name
+                    try:
+                        result = func(dataset_path, query, limit)
+                        entry["data"][limit][algo_name] = {
+                            "time": result["time"],
+                            "memory": result["memory"]
+                        }
+                    except Exception as e:
+                        entry["data"][limit][algo_name] = {
+                            "time": None,
+                            "memory": None
+                        }
+                        print(f"[ERROR] {algo_name} failed on query '{query}' and limit {limit}: {e}")
+            progress_state["results"].append(entry)
+        progress_state["status"] = "completed"
 
-    for query in queries:
-        entry = {"query": query, "data": {}}
-        for limit in limits:
-            entry["data"][limit] = {}
-            for algo_name, func in algorithms.items():
-                try:
-                    result = func(dataset_path, query, limit)
-                    entry["data"][limit][algo_name] = {
-                        "time": result["time"],
-                        "memory": result["memory"]
-                    }
-                except Exception as e:
-                    entry["data"][limit][algo_name] = {
-                        "time": None,
-                        "memory": None
-                    }
-                    print(f"[ERROR] {algo_name} failed on query '{query}' and limit {limit}: {e}")
-        simulation_results.append(entry)
+    thread = threading.Thread(target=run_simulation)
+    thread.start()
+    return jsonify({"started": True})
 
-    return render_template("simulate.html", results=simulation_results)
+@app.route("/simulate/progress")
+def simulate_progress():
+    return jsonify(progress_state)
 
 if __name__ == "__main__":
     app.run(debug=True)
