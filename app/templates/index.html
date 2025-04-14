@@ -60,7 +60,15 @@
               />
             </div>
             <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-dark">Run Benchmark</button>
+              <button type="submit" class="btn btn-dark" id="run-benchmark-btn">
+                <span
+                  class="spinner-border spinner-border-sm me-2 d-none"
+                  role="status"
+                  id="benchmark-spinner"
+                  aria-hidden="true"
+                ></span>
+                Run Benchmark
+              </button>
             </div>
           </form>
 
@@ -331,6 +339,20 @@
           queryTypeSelect.addEventListener("change", updateHiddenFields);
           updateHiddenFields(); // initial call
         });
+
+        document.addEventListener("DOMContentLoaded", function () {
+          const benchmarkBtn = document.getElementById("run-benchmark-btn");
+          const benchmarkSpinner = document.getElementById("benchmark-spinner");
+
+          const form = document.querySelector("form[method='POST']");
+          if (form) {
+            form.addEventListener("submit", function () {
+              benchmarkSpinner.classList.remove("d-none");
+              benchmarkBtn.classList.add("disabled");
+              benchmarkBtn.setAttribute("disabled", true);
+            });
+          }
+        });        
     </script>
   </body>
 </html>
