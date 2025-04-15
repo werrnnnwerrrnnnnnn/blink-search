@@ -1,8 +1,8 @@
 from flask import Flask, request, render_template, jsonify
 from search_algorithms.linear_search import linear_search_streaming
-from search_algorithms.inverted_index_search import inverted_index_search
-from search_algorithms.trie_search import trie_search
-from search_algorithms.btree_search import btree_search
+from wrappers.btree_wrapper import BTreeWrapper
+from wrappers.trie_wrapper import TrieWrapper
+from wrappers.inverted_index_wrapper import InvertedIndexWrapper
 import json
 import time
 import tracemalloc
@@ -44,6 +44,11 @@ def index():
             return render_template("index.html", result=None, query=query, limit=limit)
         result = {}
 
+        # Build wrappers
+        btree_model = BTreeWrapper(dataset_path, limit)
+        trie_model = TrieWrapper(dataset_path, limit)
+        inverted_model = InvertedIndexWrapper(dataset_path, limit)
+
         # Linear
         raw_result = linear_search_streaming(dataset_path, query, limit, query_type)
         result["linear"] = {
@@ -54,7 +59,7 @@ def index():
         }
 
         # Inverted Index
-        raw_result = inverted_index_search(dataset_path, query, limit, query_type)
+        raw_result = inverted_model.search(query, query_type)
         result["inverted"] = {
             "matches": raw_result["matches"],
             "time": raw_result["time"],
@@ -63,7 +68,7 @@ def index():
         }
 
         # Trie
-        raw_result = trie_search(dataset_path, query, limit, query_type)
+        raw_result = trie_model.search(query, query_type)
         result["trie"] = {
             "matches": raw_result["matches"],
             "time": raw_result["time"],
@@ -72,7 +77,7 @@ def index():
         }
 
         # B-Tree
-        raw_result = btree_search(dataset_path, query, limit, query_type)
+        raw_result = btree_model.search(query, query_type)
         result["btree"] = {
             "matches": raw_result["matches"],
             "time": raw_result["time"],
@@ -135,25 +140,40 @@ def complexity():
     print(f"=== Query Type: {query_type}")
     print(f"=== Limits: {limits}")
 
-    algorithms = {
-        "linear": linear_search_streaming,
-        "inverted": inverted_index_search,
-        "trie": trie_search,
-        "btree": btree_search
-    }
-
+    algorithms = ["linear", "inverted", "trie", "btree"]
     chart_data = {algo: [] for algo in algorithms}
     start_time = time.time()
 
     for limit in limits:
-        for algo_name, func in algorithms.items():
+        print(f"\n--- Dataset Size: {limit} ---")
+
+        # Build once
+        btree_model = BTreeWrapper(dataset_path, limit)
+        trie_model = TrieWrapper(dataset_path, limit)
+        inverted_model = InvertedIndexWrapper(dataset_path, limit)
+
+        for algo_name in ["linear", "inverted", "trie", "btree"]:
             try:
-                result = func(dataset_path, query, limit, query_type=query_type)
-                time_taken = result.get("time", 0)
+                if algo_name == "linear":
+                    result = linear_search_streaming(dataset_path, query, limit, query_type)
+                    time_taken = result["time"]
+                else:
+                    start = time.time()
+                    if algo_name == "btree":
+                        _ = btree_model.search(query, query_type)
+                    elif algo_name == "trie":
+                        _ = trie_model.search(query, query_type)
+                    elif algo_name == "inverted":
+                        _ = inverted_model.search(query, query_type)
+                    time_taken = round((time.time() - start) * 1000, 2)
+
                 chart_data[algo_name].append(time_taken)
                 print(f"{algo_name} | Limit: {limit} | Time: {time_taken} ms")
             except Exception as e:
                 print(f"[ERROR] {algo_name} failed at limit {limit}: {e}")
+                chart_data[algo_name].append(None)
+            except Exception as e:
+                print(f"[ERROR] {algo_name} failed: {e}")
                 chart_data[algo_name].append(None)
 
     total_time_ms = round((time.time() - start_time) * 1000, 2)
@@ -183,12 +203,6 @@ def start_simulation():
         progress_state["status"] = "running"
         queries = ["funny poems", "loved this book", "boring", "interesting premise"]
         limits = [100, 500, 1000, 2000]
-        algorithms = {
-            "linear": linear_search_streaming,
-            "inverted": inverted_index_search,
-            "trie": trie_search,
-            "btree": btree_search
-        }
         progress_state["results"] = []
 
         for query in queries:
@@ -197,10 +211,24 @@ def start_simulation():
                 progress_state["current_query"] = query
                 progress_state["current_limit"] = limit
                 entry["data"][limit] = {}
-                for algo_name, func in algorithms.items():
+
+                # Build once per limit
+                btree_model = BTreeWrapper(dataset_path, limit)
+                trie_model = TrieWrapper(dataset_path, limit)
+                inverted_model = InvertedIndexWrapper(dataset_path, limit)
+
+                for algo_name in ["linear", "inverted", "trie", "btree"]:
                     progress_state["current_algo"] = algo_name
                     try:
-                        result = func(dataset_path, query, limit)
+                        if algo_name == "linear":
+                            result = linear_search_streaming(dataset_path, query, limit)
+                        elif algo_name == "btree":
+                            result = btree_model.search(query)
+                        elif algo_name == "trie":
+                            result = trie_model.search(query)
+                        elif algo_name == "inverted":
+                            result = inverted_model.search(query)
+
                         entry["data"][limit][algo_name] = {
                             "time": result["time"],
                             "memory": result["memory"]
