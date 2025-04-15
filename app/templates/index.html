@@ -248,9 +248,9 @@
 
         const speedup = [
             1,
-            {{ "%.2f" % (result.linear.time / result.inverted.time) }},
-            {{ "%.2f" % (result.linear.time / result.trie.time) }},
-            {{ "%.2f" % (result.linear.time / result.btree.time) }}
+            {% if result.inverted.time != 0 %}{{ "%.2f" % (result.linear.time / result.inverted.time) }}{% else %}0{% endif %},
+            {% if result.trie.time != 0 %}{{ "%.2f" % (result.linear.time / result.trie.time) }}{% else %}0{% endif %},
+            {% if result.btree.time != 0 %}{{ "%.2f" % (result.linear.time / result.btree.time) }}{% else %}0{% endif %}
         ];
 
         new Chart(document.getElementById('timeChart'), {
