@@ -148,9 +148,9 @@ def complexity():
         print(f"\n--- Dataset Size: {limit} ---")
 
         # Build once
-        btree_model = BTreeWrapper(dataset_path, limit)
-        trie_model = TrieWrapper(dataset_path, limit)
-        inverted_model = InvertedIndexWrapper(dataset_path, limit)
+        # btree_model = BTreeWrapper(dataset_path, limit)
+        # trie_model = TrieWrapper(dataset_path, limit)
+        # inverted_model = InvertedIndexWrapper(dataset_path, limit)
 
         for algo_name in ["linear", "inverted", "trie", "btree"]:
             try:
@@ -158,13 +158,23 @@ def complexity():
                     result = linear_search_streaming(dataset_path, query, limit, query_type)
                     time_taken = result["time"]
                 else:
-                    start = time.time()
+                    start = 0
                     if algo_name == "btree":
+                        btree_model = BTreeWrapper(dataset_path, limit)
+                        start = time.time()
                         _ = btree_model.search(query, query_type)
+                        del(btree_model)
                     elif algo_name == "trie":
+                        if(limit > 400001): continue
+                        trie_model = TrieWrapper(dataset_path, limit)
+                        start = time.time()
                         _ = trie_model.search(query, query_type)
+                        del(trie_model)
                     elif algo_name == "inverted":
+                        inverted_model = InvertedIndexWrapper(dataset_path, limit)
+                        start = time.time()
                         _ = inverted_model.search(query, query_type)
+                        del(inverted_model)
                     time_taken = round((time.time() - start) * 1000, 2)
 
                 chart_data[algo_name].append(time_taken)
@@ -251,4 +261,4 @@ def simulate_progress():
     return jsonify(progress_state)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5001)
